@@ -8,7 +8,11 @@ Reference:
 - Pfleiderer, Frieler, Abeßer (2017) — "Inside the Jazzomat"
 """
 
-from solokit.patterns.ngram import NGramExtractor, NGram
+from solokit.patterns.ngram import (
+    NGram,
+    NGramExtractor,
+    PhraseNGramExtractor,
+)
 from solokit.patterns.similarity import Match, search_patterns
 from solokit.patterns.transformations import (
     Transformation,
@@ -23,6 +27,7 @@ __all__ = [
     "Match",
     "NGram",
     "NGramExtractor",
+    "PhraseNGramExtractor",
     "Transformation",
     "cdpcx",
     "fuzzy_interval",

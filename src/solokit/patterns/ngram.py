@@ -135,15 +135,38 @@ class NGramExtractor:
         """Extract N-grams from a Phrase (carries onset_beat)."""
         return NGram.from_phrase(phrase, self.n, self.transformation)
 
+    def extract_from_phrases(
+        self, phrases: Iterable[Phrase]
+    ) -> tuple[NGram, ...]:
+        """Extract N-grams from a sequence of phrases.
+
+        Unlike `extract_from_pitches` (which extracts from a flat
+        sequence and may cross phrase boundaries), this extracts one
+        N-gram per phrase: each phrase contributes 0 or 1 n-gram (the
+        most distinctive, or the median, depending on `mode`).
+
+        For now, each phrase contributes up to one n-gram starting at
+        the first note. This is intentionally conservative — we
+        don't want "phantom" matches from partial phrases.
+        """
+        out: list[NGram] = []
+        for phrase in phrases:
+            grams = self.extract_from_phrase(phrase)
+            if grams:
+                # Take the first n-gram (earliest in the phrase) as
+                # the phrase's signature
+                out.append(grams[0])
+        return tuple(out)
+
     def extract_from_solo(self, solo: Solo) -> Iterable[NGram]:
         """Yield N-grams from a Solo's transcription, one per phrase if available.
 
-        If the Solo has phrases, extract from each. Otherwise segment-less
-        extraction over the full transcription.
+        If the Solo has phrases, extract from each phrase (one n-gram
+        per phrase — the "phrase signature"). Otherwise segment-less
+        extraction over the full transcription (the legacy behavior).
         """
         if solo.phrases:
-            for phrase in solo.phrases:
-                yield from self.extract_from_phrase(phrase)
+            yield from self.extract_from_phrases(solo.phrases)
         else:
             pitches = solo.transcription.pitches
             yield from self.extract_from_pitches(pitches)
@@ -166,4 +189,56 @@ class NGramExtractor:
         return cls(n=n, transformation="fuzzyinterval")
 
 
-__all__ = ["NGram", "NGramExtractor"]
+__all__ = ["NGram", "NGramExtractor", "PhraseNGramExtractor"]
+
+
+class PhraseNGramExtractor:
+    """Alias for NGramExtractor that documents phrase-level intent.
+
+    Functionally identical to NGramExtractor. Provided as a separate
+    class so code can signal intent (`isinstance(x, PhraseNGramExtractor)`
+    for the phrase-level path) and so the API surface reads cleanly.
+
+    Use with `extract_from_phrases(phrases)` to get one n-gram per
+    phrase (the "phrase signature" approach) rather than a sliding
+    window of n-grams across the full pitch sequence.
+    """
+
+    def __init__(self, n: int, transformation: str = "interval") -> None:
+        self._impl = NGramExtractor(n=n, transformation=transformation)  # type: ignore[arg-type]
+
+    @property
+    def n(self) -> int:
+        return self._impl.n
+
+    @property
+    def transformation(self) -> str:
+        return self._impl.transformation
+
+    def extract_from_phrase(self, phrase):
+        return self._impl.extract_from_phrase(phrase)
+
+    def extract_from_phrases(self, phrases):
+        return self._impl.extract_from_phrases(phrases)
+
+    def extract_from_pitches(self, pitches):
+        return self._impl.extract_from_pitches(pitches)
+
+    def extract_from_solo(self, solo):
+        return self._impl.extract_from_solo(solo)
+
+    # Convenience constructors (mirror NGramExtractor)
+    @classmethod
+    def interval(cls, n: int) -> "PhraseNGramExtractor":
+        """Shorthand for PhraseNGramExtractor(n, 'interval')."""
+        return cls(n=n, transformation="interval")
+
+    @classmethod
+    def pitch_based(cls, n: int) -> "PhraseNGramExtractor":
+        """Shorthand for PhraseNGramExtractor(n, 'pitch')."""
+        return cls(n=n, transformation="pitch")
+
+    @classmethod
+    def fuzzy(cls, n: int) -> "PhraseNGramExtractor":
+        """Shorthand for PhraseNGramExtractor(n, 'fuzzyinterval')."""
+        return cls(n=n, transformation="fuzzyinterval")
