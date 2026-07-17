@@ -39,10 +39,13 @@ pip install -e ".[all]"
 ## Quick start
 
 ```bash
-# Search the LOCAL Omnibook corpus (50 Charlie Parker solos, instant, offline)
+# Search the local WJAZD corpus (456 jazz solos, instant, offline)
+solokit search --pattern '-1 -1 4 -5 -2' --corpus wjazzd
+
+# Local Charlie Parker Omnibook (50 solos)
 solokit search --pattern '-1 -1 4 -5 -2' --corpus omnibook
 
-# Same pattern against the remote DTL corpus (larger, sometimes down)
+# Remote DTL corpus (larger, sometimes down)
 solokit search --pattern '-1 -1 4 -5 -2' --corpus dtl
 
 # Extract features from a local transcription
@@ -56,18 +59,17 @@ solokit serve --port 8000
 ```
 
 ```python
-from solokit.patterns import NGramExtractor, search_patterns
-from solokit.corpora import OmnibookCorpus  # local, instant
+from solokit.corpora import WJAZDCorpus  # local, instant
 
-# Extract a pattern from a phrase
-extractor = NGramExtractor.interval(5)
-pattern = extractor.extract_from_pitches([60, 59, 58, 62, 57])[0].values
-
-# Search the local Omnibook corpus
-corpus = OmnibookCorpus()
-matches = corpus.search(pattern, min_similarity=0.7, max_length_difference=1)
-for match in matches[:10]:
-    print(f"{match.match.similarity:.2f}  {match.title}  (beat {match.start_position:.1f})")
+corpus = WJAZDCorpus()  # 456 solos, 200k+ events
+matches = corpus.search(
+    [-1, -1, 4, -5, -2],  # classic bebop pattern
+    transformation="interval",
+    min_similarity=0.7,
+    max_length_difference=1,
+)
+for m in matches[:10]:
+    print(f"{m.match.similarity:.2f}  {m.year}  {m.performer} - {m.title}")
 ```
 
 ## Architecture
@@ -77,13 +79,14 @@ solokit/
 ├── core/          # Solo, Phrase, Transcription (data model)
 ├── features/      # YAML-driven feature machine + individual features
 ├── patterns/      # NGram extraction, similarity search, transformations
-├── corpora/       # Loaders for DTL (remote), Omnibook (local), WJAZD, EsAC
+├── corpora/       # Loaders for DTL (remote), Omnibook + WJAZD (local), EsAC
 ├── audio/         # Transcription (pYIN, basic-pitch), F0, tuning, loudness
 ├── api/           # FastAPI server + HTTP client
 └── cli.py         # Click command-line interface
 
 data/
-└── omnibook/      # 50 Charlie Parker solos in MusicXML (CC BY-NC-SA 2.0)
+├── omnibook/      # 50 Charlie Parker solos in MusicXML (CC BY-NC-SA 2.0)
+└── wjazzd.db      # 456 hand-transcribed jazz solos in SQLite (ODbL 1.0)
 ```
 
 The pipeline:
@@ -96,15 +99,15 @@ score MIDI ─┘                                  └─→ [feature machine]  
 
 ## Corpora
 
-| Name | Source | Size | Offline? | License |
-|---|---|---|---|---|
-| `dtl` | DTL HTTP API | 1736+ solos | No (network) | (research use) |
-| `omnibook` | local MusicXML | 50 solos | **Yes** | CC BY-NC-SA 2.0 |
-| `wjazzd` | (not yet implemented) | 456 solos | — | research |
-| `esac` | (not yet implemented) | 6000+ folk songs | — | research |
+| Name | Source | Size | Offline? | License | Coverage |
+|---|---|---|---|---|---|
+| `wjazzd` | local SQLite | **456 solos** | **Yes** | ODbL 1.0 | Coltrane (20), Miles (19), Parker (17), Bebop→Free |
+| `omnibook` | local MusicXML | 50 solos | **Yes** | CC BY-NC-SA 2.0 | Charlie Parker |
+| `dtl` | DTL HTTP API | 1736+ solos | No (network) | (research use) | DTL1000 auto-transcribed |
+| `esac` | (not yet implemented) | 6000+ folk songs | — | research | Essen Folk Song Collection |
 
-Use `--corpus omnibook` for fast offline searches. The Omnibook is small but contains canonical Charlie Parker phrases (validated against DTL on 2026-07-16).
+Use `--corpus wjazzd` for instant offline searches across the largest local corpus. Use `--corpus dtl` for the full DTL1000 catalog when the network is up.
 
 ## License
 
-MIT. The bundled Omnibook corpus is CC BY-NC-SA 2.0 (non-commercial).
+MIT. The bundled Omnibook corpus is CC BY-NC-SA 2.0 (non-commercial). The bundled WJAZD database is ODbL 1.0.

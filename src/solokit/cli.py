@@ -67,11 +67,11 @@ def cli() -> None:
     "-c",
     "--corpus",
     "corpus_name",
-    type=click.Choice(["dtl", "omnibook"]),
+    type=click.Choice(["dtl", "omnibook", "wjazzd"]),
     default="dtl",
     show_default=True,
-    help="Which corpus to search. 'omnibook' is local (50 solos, instant), "
-    "'dtl' is remote (larger but sometimes down).",
+    help="Which corpus to search. 'omnibook' (50 solos) and 'wjazzd' (456 solos) "
+    "are local and instant. 'dtl' is remote (larger but sometimes down).",
 )
 @click.option(
     "--min-similarity",
@@ -173,10 +173,11 @@ def search(
                 min_frequency=min_frequency,
                 limit=limit,
             )
-    else:  # omnibook
-        from solokit.corpora import OmnibookCorpus
+    else:  # omnibook or wjazzd
+        from solokit.corpora import OmnibookCorpus, WJAZDCorpus
 
-        corpus = OmnibookCorpus()
+        corpus_cls = WJAZDCorpus if corpus_name == "wjazzd" else OmnibookCorpus
+        corpus = corpus_cls()
         results = corpus.search(
             query_pattern,
             transformation=transformation,  # type: ignore[arg-type]

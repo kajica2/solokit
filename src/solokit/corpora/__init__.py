@@ -7,11 +7,13 @@ you instantiate the corpus, optionally configure it, and call `.search(...)`.
 from solokit.corpora.base import Corpus, CorpusError, SearchResult
 from solokit.corpora.dtl1000 import DTLCorpus
 from solokit.corpora.omnibook import OmnibookCorpus
+from solokit.corpora.wjazzd import WJAZDCorpus
 
 __all__ = [
     "Corpus",
     "CorpusError",
     "DTLCorpus",
     "OmnibookCorpus",
+    "WJAZDCorpus",
     "SearchResult",
 ]

@@ -233,20 +233,12 @@ class OmnibookCorpus(Corpus):
         Builds an NGram corpus from all 50 solos, searches, then groups
         results by solo so you can see "which songs contain this pattern".
         """
-        from solokit.patterns.ngram import NGram, NGramExtractor  # avoid circular import
+        from solokit.patterns.ngram import NGram  # avoid circular import
 
-        # NGram length is in input-note count. For interval transformations
-        # the output length is input - 1, so we need input = n + 1
-        n_for_extractor = (
-            len(pattern) + 1
-            if transformation in ("interval", "fuzzyinterval")
-            else len(pattern)
-        )
-        extractor = NGramExtractor(n=n_for_extractor, transformation=transformation)  # type: ignore[arg-type]
+        # Gram length is the length of the pattern (in values).
+        n = len(pattern)
 
         # Build grams with onset_beat carried over from the source notes.
-        # We need to extract from pitches AND track the onset, so we do it
-        # manually here (extract_from_pitches doesn't carry onset).
         gram_list: list[NGram] = []
         gram_to_solo: dict[int, "Solo"] = {}
 
@@ -255,12 +247,12 @@ class OmnibookCorpus(Corpus):
             onsets = [
                 n.onset_beat for n in solo.transcription.notes if n.pitch is not None
             ]
-            if len(pitches) < n_for_extractor:
+            if len(pitches) < n:
                 continue
             transformed = transform_for_search(pitches, transformation)
-            for i in range(len(transformed) - n_for_extractor + 1):
+            for i in range(len(transformed) - n + 1):
                 gram = NGram(
-                    values=tuple(transformed[i : i + n_for_extractor]),
+                    values=tuple(transformed[i : i + n]),
                     source_id=solo.metadata.melid,
                     onset_beat=onsets[i] if i < len(onsets) else None,
                 )
