@@ -30,6 +30,7 @@ from rich.table import Table
 from solokit import __version__
 from solokit.corpora import DTLCorpus
 from solokit.patterns.transformations import transform
+from solokit.cli_download import download_corpora
 
 console = Console()
 err_console = Console(stderr=True)
@@ -444,3 +445,8 @@ def _load_transcription(path: Path, *, tempo_bpm: float = 120.0):
 
 if __name__ == "__main__":
     cli()
+
+
+# Register additional subcommands (defined in separate modules to keep
+# this file from growing unboundedly)
+cli.add_command(download_corpora)
