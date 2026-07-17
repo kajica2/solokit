@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>solokit — jazz solo pattern search</title>
+    <link rel="stylesheet" href="/static/css/styles.css">
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🎷</text></svg>">
+</head>
+<body>
+    <header class="topbar">
+        <div class="brand">
+            <span class="logo">🎷</span>
+            <h1>solokit</h1>
+            <span class="tagline">jazz solo pattern search</span>
+        </div>
+        <div class="status" id="status">
+            <span class="dot" id="status-dot"></span>
+            <span id="status-text">connecting…</span>
+        </div>
+    </header>
+
+    <main class="layout">
+        <!-- Pattern search panel -->
+        <section class="panel" id="search-panel">
+            <header class="panel-header">
+                <h2>Pattern search</h2>
+                <p class="panel-sub">Type or paste a melodic pattern. Find every historical jazz recording that contains a similar shape.</p>
+            </header>
+
+            <form class="form" id="search-form">
+                <div class="field">
+                    <label for="pattern">
+                        Pattern
+                        <span class="hint" id="pattern-hint">intervals, space- or comma-separated, e.g. <code>-1 -1 4 -5 -2</code></span>
+                    </label>
+                    <input
+                        type="text"
+                        id="pattern"
+                        name="pattern"
+                        placeholder="-1 -1 4 -5 -2"
+                        autocomplete="off"
+                        spellcheck="false"
+                        required
+                    >
+                </div>
+
+                <div class="grid-2">
+                    <div class="field">
+                        <label for="transformation">Transformation</label>
+                        <select id="transformation" name="transformation">
+                            <option value="interval" selected>Interval (key-invariant)</option>
+                            <option value="pitch">Pitch (exact MIDI)</option>
+                            <option value="fuzzyinterval">Fuzzy interval</option>
+                            <option value="cdpcx">Chord-diatonic pitch class</option>
+                        </select>
+                    </div>
+
+                    <div class="field">
+                        <label for="limit">Max results</label>
+                        <input type="number" id="limit" name="limit" value="20" min="1" max="500" step="1">
+                    </div>
+                </div>
+
+                <div class="field">
+                    <label>Corpora</label>
+                    <div class="checkbox-group" id="corpora-group">
+                        <label class="checkbox">
+                            <input type="checkbox" name="corpus" value="wjazzd" checked>
+                            <span>WJAZD <small>(local, 456 solos)</small></span>
+                        </label>
+                        <label class="checkbox">
+                            <input type="checkbox" name="corpus" value="omnibook">
+                            <span>Omnibook <small>(local, 50 solos)</small></span>
+                        </label>
+                        <label class="checkbox">
+                            <input type="checkbox" name="corpus" value="dtl">
+                            <span>DTL <small>(remote, may be slow)</small></span>
+                        </label>
+                    </div>
+                </div>
+
+                <div class="field">
+                    <label for="min-similarity">
+                        Min similarity: <strong id="min-similarity-value">0.80</strong>
+                    </label>
+                    <input type="range" id="min-similarity" name="min-similarity" min="0.5" max="1.0" step="0.05" value="0.8">
+                </div>
+
+                <div class="field">
+                    <label for="max-length-diff">
+                        Max length difference: <strong id="max-length-diff-value">1</strong>
+                    </label>
+                    <input type="range" id="max-length-diff" name="max-length-diff" min="0" max="5" step="1" value="1">
+                </div>
+
+                <div class="actions">
+                    <button type="submit" class="primary" id="search-btn">
+                        <span class="btn-label">Search</span>
+                        <span class="spinner" hidden></span>
+                    </button>
+                    <button type="button" class="ghost" id="example-btn">Try an example</button>
+                </div>
+            </form>
+
+            <div class="results" id="search-results" hidden>
+                <div class="results-header">
+                    <h3>Matches <span class="muted" id="results-count"></span></h3>
+                    <span class="muted" id="results-took"></span>
+                </div>
+                <div class="results-table-wrap">
+                    <table class="results-table">
+                        <thead>
+                            <tr>
+                                <th>sim</th>
+                                <th>ed</th>
+                                <th>performer</th>
+                                <th>title</th>
+                                <th>db</th>
+                                <th>yr</th>
+                            </tr>
+                        </thead>
+                        <tbody id="results-tbody"></tbody>
+                    </table>
+                </div>
+                <div class="results-empty" id="results-empty" hidden>
+                    No matches. Try lowering the min similarity, increasing the length tolerance, or picking more corpora.
+                </div>
+            </div>
+        </section>
+
+        <!-- Audio upload panel -->
+        <section class="panel" id="audio-panel">
+            <header class="panel-header">
+                <h2>Drop a solo</h2>
+                <p class="panel-sub">Upload a <code>.wav</code> of a jazz solo. We'll transcribe it (via pYIN), then you can search the corpus for similar licks.</p>
+            </header>
+
+            <form class="form" id="audio-form">
+                <div class="dropzone" id="dropzone">
+                    <input type="file" id="audio-file" name="file" accept="audio/wav,audio/x-wav,audio/mpeg,audio/mp3,.wav,.mp3" hidden>
+                    <div class="dropzone-content">
+                        <div class="dropzone-icon">🎵</div>
+                        <div class="dropzone-text">
+                            <strong>Click to choose</strong> or drag a .wav here
+                        </div>
+                        <div class="dropzone-filename muted" id="audio-filename"></div>
+                    </div>
+                </div>
+
+                <div class="actions">
+                    <button type="submit" class="primary" id="transcribe-btn" disabled>
+                        <span class="btn-label">Transcribe</span>
+                        <span class="spinner" hidden></span>
+                    </button>
+                </div>
+            </form>
+
+            <div class="transcription" id="transcription" hidden>
+                <div class="results-header">
+                    <h3>Transcription</h3>
+                    <span class="muted" id="transcription-meta"></span>
+                </div>
+                <div class="notes-preview" id="notes-preview"></div>
+                <details class="pattern-derivation">
+                    <summary>Derived interval pattern <small>(click to copy to search)</small></summary>
+                    <code id="derived-pattern" class="derived-pattern"></code>
+                    <button type="button" class="ghost small" id="use-derived-btn">Use in search</button>
+                </details>
+            </div>
+        </section>
+    </main>
+
+    <footer class="footer">
+        <p>
+            solokit ·
+            <a href="/docs" target="_blank">API docs</a> ·
+            <a href="https://github.com/kajicadjuric/solokit" target="_blank" rel="noopener">GitHub</a>
+        </p>
+    </footer>
+
+    <div class="toast" id="toast" hidden></div>
+
+    <script src="/static/js/app.js" type="module"></script>
+</body>
+</html>

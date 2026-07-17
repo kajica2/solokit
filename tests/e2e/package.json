@@ -1,0 +1,13 @@
+{
+  "name": "solokit-e2e",
+  "version": "1.0.0",
+  "description": "End-to-end Puppeteer tests for the solokit frontend",
+  "private": true,
+  "scripts": {
+    "test": "node frontend.test.mjs",
+    "test:run": "bash run.sh"
+  },
+  "dependencies": {
+    "puppeteer": "^25.3.0"
+  }
+}

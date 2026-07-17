@@ -15,7 +15,8 @@ pattern-search API.
 - **Feature extraction** — YAML-driven feature machine. Define a feature
   (pitch histogram, IOI, contour) in YAML; run it over a solo.
 - **Audio transcription** *(optional)* — feed in a `.wav` of a jazz solo,
-  get back note events using Spotify's `basic-pitch`. Plug the result into
+  get back note events using Spotify's `basic-pitch` (polyphonic) or
+  `librosa.pyin` (monophonic, recommended for jazz). Plug the result into
   the pattern search and you have a "drop-a-solo, see who else played it"
   loop.
 - **Score-informed analysis** — given audio + a transcription, estimate
@@ -82,6 +83,7 @@ solokit/
 ├── corpora/       # Loaders for DTL (remote), Omnibook + WJAZD (local), EsAC
 ├── audio/         # Transcription (pYIN, basic-pitch), F0, tuning, loudness
 ├── api/           # FastAPI server + HTTP client
+├── frontend/      # Single-page HTML UI (served at /)
 └── cli.py         # Click command-line interface
 
 data/
@@ -96,6 +98,37 @@ audio file ─┐
             ├─→ [transcription] → NoteEvents ─┬─→ [pattern extraction] → search → matches
 score MIDI ─┘                                  └─→ [feature machine]   → features
 ```
+
+## Frontend
+
+Run `solokit serve` and open <http://localhost:8000/>. You'll get a single-page
+web UI with:
+
+- A **pattern search** panel — type or paste a pattern, pick corpora, set
+  similarity / length tolerance, see matches in a sortable table.
+- A **drop a solo** panel — upload a `.wav` of a jazz solo, get the
+  transcription as note chips, derive the interval pattern, and
+  one-click "use in search" to chain into the corpus search.
+- Live status indicator in the header showing server version + available
+  corpora.
+- Per-corpus error reporting — if DTL is down, the local corpora still
+  return results and a toast tells you what failed.
+
+CORS is permissive by default for local dev. Override with the
+`SOLOKIT_CORS_ORIGINS` env var (comma-separated).
+
+## Testing
+
+```bash
+# Unit + endpoint tests (pytest)
+pytest
+
+# End-to-end test (Puppeteer) — boots a uvicorn, runs the browser test, tears down
+tests/e2e/run.sh
+```
+
+The e2e test takes screenshots into `tests/e2e/screenshots/` so you can
+eyeball what the UI looks like in headless mode.
 
 ## Corpora
 

@@ -67,6 +67,10 @@ class SearchResponse(BaseModel):
     matches: list[MatchResult]
     total: int
     took_ms: float
+    errors: dict[str, str] | None = Field(
+        default=None,
+        description="Per-corpus errors (e.g. DTL down). Partial results still returned.",
+    )
 
 
 class TranscribeRequest(BaseModel):

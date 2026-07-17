@@ -51,3 +51,8 @@ data/
 .transcription-*.json
 .env
 .env.local
+
+# E2E (Puppeteer) — node_modules + generated screenshots
+tests/e2e/node_modules/
+tests/e2e/screenshots/
+tests/e2e/.puppeteercache/
