@@ -61,10 +61,9 @@ def download_corpora(
     from solokit import data as data_module
 
     if data_dir is None:
-        # Default: <solokit>/data/
-        # src/solokit/data.py is at <solokit>/src/solokit/data.py
-        # so the data dir is ../../data relative to that
-        data_dir = Path(__file__).parent.parent.parent / "data"
+        # Default: ./data (current working directory). This works whether
+        # solokit is installed from PyPI or run from a git checkout.
+        data_dir = Path.cwd() / "data"
 
     if status:
         _print_status(data_module, data_dir)

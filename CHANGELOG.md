@@ -3,6 +3,44 @@
 All notable changes to solokit are documented here. The format is
 based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [0.2.0] - 2026-07-17
+
+### Added
+
+- **`solokit download-corpora`** CLI command. New users can bootstrap
+  the WJAZD SQLite (41MB) and Omnibook MusicXML (10MB) into `data/`
+  with one command. The data is excluded from the PyPI sdist for
+  license attribution reasons; this command is the canonical way to
+  fetch it. Verifies file format (SQLite magic, ZIP magic) to catch
+  404 HTML pages.
+- `solokit.data` module with `CorpusSpec`, `download_wjazzd()`,
+  `download_omnibook()`, `download_all()`, `data_status()`.
+- `solokit.cli_download` subcommand with `--status`, `--force`,
+  `--data-dir`, and `--corpus` filtering.
+- 12 new tests in `tests/test_data.py` (total: 119 passing).
+
+### Changed
+
+- Bumped version 0.1.0 → 0.2.0.
+- `data_dir` default in `download-corpora` now uses the current
+  working directory (was previously the install location of the
+  package, which broke for PyPI installs).
+- `data_status()` checks file format via magic bytes, not file
+  size — smaller test files no longer trigger false positives.
+
+### For PyPI publishers
+
+```bash
+# 1. Test on TestPyPI first
+.venv/bin/python -m build
+.venv/bin/twine upload --repository testpypi dist/*
+
+# 2. After verifying, publish to PyPI
+.venv/bin/twine upload dist/*
+```
+
+[0.2.0]: https://github.com/kajica2/solokit/releases/tag/v0.2.0
+
 ## [0.1.0] - 2026-07-17
 
 ### Added
