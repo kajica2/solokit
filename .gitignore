@@ -52,6 +52,9 @@ data/
 .env
 .env.local
 
+# Force-add the data attribution doc (overrides `data/` ignore)
+!data/ATTRIBUTION.md
+
 # E2E (Puppeteer) — node_modules + generated screenshots
 tests/e2e/node_modules/
 tests/e2e/screenshots/

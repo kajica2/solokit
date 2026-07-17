@@ -1,0 +1,58 @@
+cff-version: 1.2.0
+message: |
+  If you use solokit in academic work, please cite both the solokit
+  software AND the underlying corpus data (see data/ATTRIBUTION.md
+  for citations).
+type: software
+title: solokit
+version: 0.1.0
+date-released: 2026-07-17
+url: https://github.com/kajica2/solokit
+repository-code: https://github.com/kajica2/solokit
+license: MIT
+keywords:
+  - music
+  - jazz
+  - music-information-retrieval
+  - pattern-search
+  - transcription
+  - musicology
+authors:
+  - family-names: Djuric
+    given-names: Kajica
+    email: kai.djuric@gmail.com
+    orcid: https://orcid.org/0000-0000-0000-0000
+references:
+  - type: article
+    title: "Inside the Jazzomat — New Perspectives for Jazz Research"
+    authors:
+      - family-names: Pfleiderer
+        given-names: Martin
+      - family-names: Frieler
+        given-names: Klaus
+      - family-names: Abeßer
+        given-names: Jakob
+      - family-names: Zaddach
+        given-names: Wolf-Georg
+      - family-names: Burkhart
+        given-names: Benjamin
+      - family-names: Meißner
+        given-names: Martin
+      - family-names: Pfändner
+        given-names: Michael
+      - family-names: Zimmermann
+        given-names: Anja
+    year: 2017
+    publisher: Schott Campus
+  - type: paper-conference
+    title: "Using Multidimensional Sequences for Improvisation in the OMax Paradigm"
+    authors:
+      - family-names: Déguernel
+        given-names: Ken
+      - family-names: Vincent
+        given-names: Emmanuel
+      - family-names: Assayag
+        given-names: Gérard
+    year: 2016
+    conference:
+      name: 13th Sound and Music Computing Conference
