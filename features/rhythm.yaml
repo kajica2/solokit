@@ -1,0 +1,23 @@
+name: rhythm_features
+description: >
+  Rhythm-focused feature set. Use this when studying timing, density,
+  or rhythmic patterns.
+features:
+  - name: note_density
+    type: scalar
+    function: solokit.features.rhythm:note_density
+
+  - name: ioi_histogram_log
+    type: histogram
+    function: solokit.features.rhythm:ioi_histogram
+    args:
+      bins: 16
+      log_scale: true
+
+  - name: duration_stats
+    type: scalar
+    function: solokit.features.rhythm:duration_stats
+
+  - name: rhythmic_variability
+    type: scalar
+    function: solokit.features.rhythm:rhythmic_variability

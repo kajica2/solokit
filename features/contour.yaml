@@ -1,0 +1,14 @@
+name: contour_features
+description: >
+  Melodic contour features (placeholder). Real contour features
+  (Huron-style classification, n-gram contour histograms) are TODO.
+features:
+  - name: pitch_class_histogram
+    type: histogram
+    function: solokit.features.pitch:pitch_class_histogram
+    args:
+      bins: 12
+  # TODO:
+  # - huron_contour_histogram
+  # - directional_change_rate
+  # - melodic_arch_index

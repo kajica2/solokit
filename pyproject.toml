@@ -1,0 +1,123 @@
+[build-system]
+requires = ["hatchling>=1.18"]
+build-backend = "hatchling.build"
+
+[project]
+name = "solokit"
+version = "0.1.0"
+description = "Pattern search and analysis toolkit for jazz solo transcriptions"
+readme = "README.md"
+requires-python = ">=3.11"
+license = { text = "MIT" }
+authors = [
+    { name = "Kajica Djuric", email = "kai.djuric@gmail.com" },
+]
+keywords = [
+    "music",
+    "jazz",
+    "music-information-retrieval",
+    "pattern-search",
+    "transcription",
+    "musicology",
+]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Intended Audience :: Science/Research",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Topic :: Scientific/Engineering :: Information Analysis",
+    "Topic :: Multimedia :: Sound/Audio :: Analysis",
+]
+dependencies = [
+    "music21>=9.1",
+    "numpy>=1.26",
+    "scipy>=1.11",
+    "rapidfuzz>=3.6",
+    "pyyaml>=6.0",
+    "pydantic>=2.5",
+    "httpx>=0.26",
+    "click>=8.1",
+    "rich>=13.7",
+]
+
+[project.optional-dependencies]
+# Audio transcription (the optional-but-killer feature)
+audio = [
+    "librosa>=0.10",
+    "soundfile>=0.12",
+    "basic-pitch>=0.3",
+    "torch>=2.0",
+    # resampy (a basic-pitch dep) imports pkg_resources, which setuptools
+    # removed in 81.0.0 (Nov 2025). Pin to <81 until basic-pitch drops resampy.
+    "setuptools<81",
+]
+# Local corpus storage
+db = [
+    "sqlalchemy>=2.0",
+]
+# API server
+api = [
+    "fastapi>=0.109",
+    "uvicorn[standard]>=0.27",
+    "python-multipart>=0.0.9",  # for /transcribe file uploads
+]
+# Visualization
+viz = [
+    "matplotlib>=3.8",
+    "plotly>=5.18",
+]
+# All extras
+all = [
+    "solokit[audio,db,api,viz]",
+]
+# Development
+dev = [
+    "solokit[all]",
+    "pytest>=7.4",
+    "pytest-cov>=4.1",
+    "hypothesis>=6.92",
+    "ruff>=0.1",
+    "mypy>=1.8",
+    "ipython>=8.18",
+    "python-multipart>=0.0.9",  # needed because tests import solokit.api
+]
+
+[project.urls]
+Homepage = "https://github.com/kajicadjuric/solokit"
+Issues = "https://github.com/kajicadjuric/solokit/issues"
+# Reference projects
+"Dig That Lick" = "https://dig-that-lick.hfm-weimar.de/"
+"Jazzomat Project" = "https://jazzomat.hfm-weimar.de/"
+
+[project.scripts]
+solokit = "solokit.cli:cli"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/solokit"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py311"
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "I", "N", "UP", "B", "C4", "SIM", "RUF"]
+ignore = ["E501"]  # line-length handled by formatter
+
+[tool.ruff.lint.per-file-ignores]
+"tests/*" = ["B011"]
+
+[tool.mypy]
+python_version = "3.11"
+strict = true
+warn_unused_ignores = true
+warn_redundant_casts = true
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-ra -q --strict-markers"
+markers = [
+    "slow: marks tests as slow (deselect with '-m \"not slow\"')",
+    "audio: requires audio dependencies",
+    "network: requires network access",
+]

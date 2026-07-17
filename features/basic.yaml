@@ -1,0 +1,26 @@
+name: basic_jazz_features
+description: >
+  A baseline set of features for jazz solo analysis. Useful for a quick
+  "what does this solo look like" summary.
+features:
+  - name: pitch_class_histogram
+    type: histogram
+    function: solokit.features.pitch:pitch_class_histogram
+    args:
+      bins: 12
+
+  - name: pitch_range
+    type: scalar
+    function: solokit.features.pitch:pitch_range
+
+  - name: chromaticism_ratio
+    type: scalar
+    function: solokit.features.pitch:chromaticism_ratio
+
+  - name: note_density
+    type: scalar
+    function: solokit.features.rhythm:note_density
+
+  - name: rhythmic_variability
+    type: scalar
+    function: solokit.features.rhythm:rhythmic_variability
